@@ -7,6 +7,9 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 //put this in .env file
 const JWT_SECRET="iamdivyanshthegod";
+const fetchuser=require("../middleware/fetchuser");
+
+//*******************************ROUTE 1: USER REGISTRATION******************************************* */
 router.post('/',
     body('name', 'Enter a Valid name').isLength({ min: 5 }),
     body('Email', 'Enter a valid Email').isEmail(),
@@ -48,7 +51,7 @@ router.post('/',
             res.status(400).send({ errors: result.array() });
         }
     });
-//**********************************LOGIN Requests*********************************************** */
+//********************************** ROUTE 2:LOGIN  REGISTERED USER*********************************************** */
 router.get("/login",
 body('Email', 'Enter a valid Email').isEmail(),
 body('password', 'Entre a Valid password').exists(),
@@ -88,5 +91,19 @@ function(req,res){
 
 })
 
+//**************************************ROUTE 3:Login USER INFORMATION(JWT token Verfification)****************************************** */
+
+router.post("/getuser",fetchuser,async function(req,res){
+ try {
+    
+   userId=req.user.id;
+    const user=await User.findById(userId).select("-password"); //select every thing except password
+    console.log(user);
+    res.send(user);
+ } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal server error");
+ }
+})
 
 module.exports = router;
